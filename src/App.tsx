@@ -1,11 +1,26 @@
-import React from "react";
+import { useQuery, gql } from "@apollo/client";
+import Modal from "./Modal";
+import Observable from "zen-observable";
 
-function App() {
+const EXCHANGE_RATES = gql`
+  query GetExchangeRates {
+    rates(currency: "USD") {
+      currency
+      rate
+    }
+  }
+`;
+
+export default function App() {
+  const { loading, error, data } = useQuery(EXCHANGE_RATES);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error :(</p>;
+  console.log({ data });
   return (
-    <div className="App">
-      <h1>Hello YO</h1>
-    </div>
+    <>
+      <div>App</div>
+      <Modal />
+    </>
   );
 }
-
-export default App;
