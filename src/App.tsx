@@ -3,7 +3,7 @@ import Modal from "./Modal";
 import Observable from "zen-observable";
 
 const EXCHANGE_RATES = gql`
-  query GetExchangeRates {
+  query FetchExchangeRates {
     rates(currency: "USD") {
       currency
       rate
