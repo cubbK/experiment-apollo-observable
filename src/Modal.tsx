@@ -1,23 +1,21 @@
 import React from "react";
-import Observable from "zen-observable";
-
-let observable = new Observable((observer) => {
-  // Emit a single value after 1 second
-  let timer = setTimeout(() => {
-    observer.next("hello");
-    observer.complete();
-  }, 2000);
-
-  // On unsubscription, cancel the timer
-  return () => clearTimeout(timer);
-});
+import { useSelector, useDispatch } from "react-redux";
+import * as ModalSlice from "./modalSlice";
 
 export default function Modal() {
-  React.useEffect(() => {
-    observable.subscribe({
-      next: (x) => console.log(x),
-    });
-  }, []);
+  // @ts-ignore
+  const modalState = useSelector((state) => state.modal.value);
 
-  return <div>Modal!!!</div>;
+  const dispatch = useDispatch();
+  if (modalState === "OPEN") {
+    return (
+      <div>
+        Modal!!!
+        <button onClick={() => dispatch(ModalSlice.close())}>
+          Close modal and continue to fetch
+        </button>
+      </div>
+    );
+  }
+  return null;
 }
