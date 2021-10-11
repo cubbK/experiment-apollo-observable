@@ -1,1 +1,1 @@
-import "./hookWay/index";
+import "./sagaWay/index";
