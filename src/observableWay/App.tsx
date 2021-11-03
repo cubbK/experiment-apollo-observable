@@ -1,9 +1,13 @@
-import { useEffect } from "react";
-import { useLazyQuery, gql } from "@apollo/client";
+import React, { useEffect } from "react";
+import * as Redux from "react-redux";
+import { useQuery, gql } from "@apollo/client";
 import Modal from "./Modal";
 import { useDispatch, useSelector } from "react-redux";
 import * as ModalSlice from "./modalSlice";
-import { usePrevious } from "react-use";
+import { Observable } from "rxjs";
+import { useObservableState } from "observable-hooks";
+import { listenerCount } from "process";
+import { client } from "./index";
 const EXCHANGE_RATES = gql`
   query FetchExchangeRates {
     rates(currency: "USD") {
@@ -12,32 +16,28 @@ const EXCHANGE_RATES = gql`
     }
   }
 `;
-
-const useFetchExchangeRates = () => {
-  const [fetchExchangeRates, { loading, error, data }] =
-    useLazyQuery(EXCHANGE_RATES);
+const observable$ = (store: any) =>
+  new Observable((obs) => {
+    console.log(store);
+    // @ts-ignore wdawd
+    store.subscribe(() => {
+      const action = store.getState().currentAction;
+      console.log(action);
+      if (action === "modal/close") {
+        client.query({
+          query: EXCHANGE_RATES,
+        });
+      }
+    });
+  });
+export default function App() {
+  const store = Redux.useStore();
+  const output = useObservableState(observable$(store), "hellp");
+  const { data } = useQuery(EXCHANGE_RATES, { fetchPolicy: "cache-only" });
   const dispatch = useDispatch();
-  // @ts-ignore
-  const modalState = useSelector((state) => state.modal.value);
-  const prevModalState = usePrevious(modalState);
-
   useEffect(() => {
     dispatch(ModalSlice.open());
   }, [dispatch]);
-
-  useEffect(() => {
-    if (modalState === "CLOSED" && prevModalState === "OPEN") {
-      fetchExchangeRates();
-    }
-  }, [modalState]);
-
-  return { loading, error, data };
-};
-
-export default function App() {
-  const { loading, error, data } = useFetchExchangeRates();
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error :(</p>;
   console.log({ data });
   return (
     <>

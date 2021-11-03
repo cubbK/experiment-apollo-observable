@@ -1,1 +1,1 @@
-import "./sagaWay/index";
+import "./observableWay/index";
